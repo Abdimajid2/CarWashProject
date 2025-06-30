@@ -21,7 +21,7 @@ namespace Backend.API.Seeds
             context.SaveChanges();
 
             var timeSlots = new List<TimeSlot>();
-            var startDate = DateTime.Today;
+            var startDate = DateTime.UtcNow.Date;
 
             for (int day = 0; day < 7; day++)
             {
