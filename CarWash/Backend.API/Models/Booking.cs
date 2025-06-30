@@ -1,4 +1,6 @@
-﻿namespace Backend.API.Models
+﻿using Shared.Models.Enum;
+
+namespace Backend.API.Models
 {
     public class Booking
     {
@@ -8,13 +10,19 @@
 
         public string Email { get; set; }
 
-        public int ServiceTypeId { get; set; }
-        public ServiceType ServiceType { get; set; }
+        public BookingStatus Status { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
         public string ConfirmationToken { get; set; }
 
         public bool IsEmailConfirmed { get; set; }
+
+        //nav prop
+        public int TimeSlotId { get; set; }
+        public TimeSlot TimeSlot { get; set; }
+
+        public int ServiceTypeId { get; set; }
+        public ServiceTypes ServiceType { get; set; }
     }
 }

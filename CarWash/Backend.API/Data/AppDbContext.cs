@@ -11,7 +11,16 @@ namespace Backend.API.Data
         }
 
         public DbSet<Booking> Bookings { get; set; }
-        public DbSet<ServiceType> Servitypes { get; set; }
+        public DbSet<ServiceTypes> Servitypes { get; set; }
         public DbSet<TimeSlot> TimeSlots { get; set; }
+
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Booking>()
+                .HasOne(b => b.TimeSlot)
+                .WithOne()
+                .HasForeignKey<Booking>(b => b.TimeSlotId);
+        }
     }
 }
