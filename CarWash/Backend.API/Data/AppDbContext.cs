@@ -11,7 +11,7 @@ namespace Backend.API.Data
         }
 
         public DbSet<Booking> Bookings { get; set; }
-        public DbSet<ServiceTypes> Servitypes { get; set; }
+        public DbSet<ServiceTypes> ServiceTypes { get; set; }
         public DbSet<TimeSlot> TimeSlots { get; set; }
 
         

@@ -20,7 +20,7 @@ namespace Backend.API.Services
         /// <returns></returns>
         public async Task<List<ServiceTypeDTO>> GetAllServiceTypes()
         {
-            return await _context.Servitypes.Select(st => new ServiceTypeDTO
+            return await _context.ServiceTypes.Select(st => new ServiceTypeDTO
             {
                 Id = st.Id,
                 Description = st.Description,
@@ -29,5 +29,21 @@ namespace Backend.API.Services
 
             }).ToListAsync();
         }
+
+        public async Task<List<TimeSlotDTO>> GetAllTimeSlots()
+        {
+            return await _context.TimeSlots.Select(ts => new TimeSlotDTO
+            {
+                Id = ts.Id,
+                AppointmentDate = ts.AppointmentDate,
+                EndTime = ts.EndTime,
+                IsAvailable = ts.IsAvailable,
+                StartTime = ts.StartTime,
+
+            }).ToListAsync();
+        }
+       
+         
+
     }
 }

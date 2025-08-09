@@ -17,14 +17,9 @@ namespace Backend.API
             options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLstring")));
 
             builder.Services.AddScoped<ServiceTypesService>();
+            builder.Services.AddScoped<BookingServices>();
             builder.Services.AddControllers();
-
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowReactApp",
-                    policy => policy.WithOrigins("http://localhost:53224").AllowAnyHeader().AllowAnyMethod());
-            });
-            
+ 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

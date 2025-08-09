@@ -67,7 +67,7 @@ namespace Backend.API.Migrations
                     b.ToTable("Bookings");
                 });
 
-            modelBuilder.Entity("Backend.API.Models.ServiceType", b =>
+            modelBuilder.Entity("Backend.API.Models.ServiceTypes", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -87,7 +87,7 @@ namespace Backend.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Servitypes");
+                    b.ToTable("ServiceTypes");
                 });
 
             modelBuilder.Entity("Backend.API.Models.TimeSlot", b =>
@@ -117,7 +117,7 @@ namespace Backend.API.Migrations
 
             modelBuilder.Entity("Backend.API.Models.Booking", b =>
                 {
-                    b.HasOne("Backend.API.Models.ServiceType", "ServiceType")
+                    b.HasOne("Backend.API.Models.ServiceTypes", "ServiceType")
                         .WithMany()
                         .HasForeignKey("ServiceTypeId")
                         .OnDelete(DeleteBehavior.Cascade)

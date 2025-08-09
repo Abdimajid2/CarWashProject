@@ -17,7 +17,7 @@ namespace Backend.API.Seeds
             new ServiceTypes { Name = "Deluxe Wash", Description = "Full service with wax", Price = 39.99m },
             new ServiceTypes { Name = "Express Wash", Description = "Quick exterior wash", Price = 9.99m }
             };
-            context.Servitypes.AddRange(serviceTypes);
+            context.ServiceTypes.AddRange(serviceTypes);
             context.SaveChanges();
 
             var timeSlots = new List<TimeSlot>();

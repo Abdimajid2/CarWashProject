@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250604224029_updatemodel")]
-    partial class updatemodel
+    [Migration("20250728133826_initDb")]
+    partial class initDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,14 +54,23 @@ namespace Backend.API.Migrations
                     b.Property<int>("ServiceTypeId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TimeSlotId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ServiceTypeId");
 
+                    b.HasIndex("TimeSlotId")
+                        .IsUnique();
+
                     b.ToTable("Bookings");
                 });
 
-            modelBuilder.Entity("Backend.API.Models.ServiceType", b =>
+            modelBuilder.Entity("Backend.API.Models.ServiceTypes", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -81,7 +90,7 @@ namespace Backend.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Servitypes");
+                    b.ToTable("ServiceTypes");
                 });
 
             modelBuilder.Entity("Backend.API.Models.TimeSlot", b =>
@@ -91,6 +100,9 @@ namespace Backend.API.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AppointmentDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("interval");
@@ -108,13 +120,21 @@ namespace Backend.API.Migrations
 
             modelBuilder.Entity("Backend.API.Models.Booking", b =>
                 {
-                    b.HasOne("Backend.API.Models.ServiceType", "ServiceType")
+                    b.HasOne("Backend.API.Models.ServiceTypes", "ServiceType")
                         .WithMany()
                         .HasForeignKey("ServiceTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Backend.API.Models.TimeSlot", "TimeSlot")
+                        .WithOne()
+                        .HasForeignKey("Backend.API.Models.Booking", "TimeSlotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("ServiceType");
+
+                    b.Navigation("TimeSlot");
                 });
 #pragma warning restore 612, 618
         }
