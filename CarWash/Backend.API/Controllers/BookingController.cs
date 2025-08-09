@@ -50,11 +50,12 @@ namespace Backend.API.Controllers
 
 
         [HttpPost("createbooking")]
-        public async Task<ActionResult> CreateBooking(string licensePlate, string email, int serviceTypeId, int timeSlotId)
+        public async Task<ActionResult> CreateBooking([FromBody] BookingRequest request)
         {
             try
             {
-                var booking = await _bookingServices.CreateBookingAsync(licensePlate, email, serviceTypeId, timeSlotId);
+                var booking = await _bookingServices.CreateBookingAsync(request.LicensePlate, request.email,
+                    request.timeSlotId, request.serviceTypeId);
 
                 if(booking == null)
                 {
