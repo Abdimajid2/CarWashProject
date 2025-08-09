@@ -10,11 +10,13 @@ namespace Backend.API.Controllers
     public class BookingController : Controller
     {
         private readonly ServiceTypesService _services;
+        private readonly BookingServices _bookingServices;
      
 
-        public BookingController(ServiceTypesService services)
+        public BookingController(ServiceTypesService services, BookingServices bookingServices)
         {
             _services = services;
+            _bookingServices = bookingServices;
              
         }
 
@@ -46,5 +48,29 @@ namespace Backend.API.Controllers
                 };
         }
 
+
+        [HttpPost("createbooking")]
+        public async Task<ActionResult> CreateBooking(string licensePlate, string email, int serviceTypeId, int timeSlotId)
+        {
+            try
+            {
+                var booking = await _bookingServices.CreateBookingAsync(licensePlate, email, serviceTypeId, timeSlotId);
+
+                if(booking == null)
+                {
+                    return BadRequest(new { mewssage = "failed to create the booking" });
+                }
+
+                else
+                {
+                    return Ok(new { message = "Booking created successfully" });
+                }
+            }
+
+            catch(Exception e)
+            {
+                return BadRequest($"Failed to create booking: {e.Message}");
+            }
+        }
     }
 }

@@ -8,9 +8,9 @@ namespace Shared.Models.Enum
 {
     public enum BookingStatus
     {
-        Pending,
-        Confirmed,
-        Completed,
-        Cancelled
+        Pending= 1,
+        Confirmed = 2,
+        Completed = 3,
+        Cancelled = 4
     }
 }
