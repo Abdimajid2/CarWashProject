@@ -1,7 +1,220 @@
 ﻿@page "/"
-
+@using System.Diagnostics
+@rendermode InteractiveServer
+@inject BookingService bookingService
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudText Typo="Typo.h4" Class="mb-4">Car Wash Booking</MudText>
 
-Welcome to your new app.
+    @* Service Types Section *@
+    <MudPaper Class="pa-4 mb-4">
+        <MudText Typo="Typo.h5" Class="mb-3">Tillgängliga tvätt alternativ</MudText>
+
+        @if (serviceTypes == null)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else if (serviceTypes.Any())
+        {
+            <MudGrid>
+                @foreach (var service in serviceTypes)
+                {
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudCard Style="@(selectedservice?.Id == service.Id ? "border: 2px solid #1976d2;" : "")">
+                            <MudCardContent>
+                                <MudText Typo="Typo.h6">@service.Name</MudText>
+                                <MudText Typo="Typo.body2" Class="mb-2">@service.Description</MudText>
+                                <MudText Typo="Typo.h6" Color="Color.Primary">@service.Price kr</MudText>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Variant="@(selectedservice?.Id == service.Id ? Variant.Filled : Variant.Outlined)"
+                                           Color="Color.Primary"
+                                           OnClick="() => SelectService(service)">
+                                    @(selectedservice?.Id == service.Id ? "Vald" : "Välj Service")
+                                </MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Warning">Inga tvätt alternativ tillgängligt</MudAlert>
+        }
+    </MudPaper>
+
+    @* Time Slots Section *@
+    <MudPaper Class="pa-4 mb-4">
+        <MudText Typo="Typo.h5" Class="mb-3">Tillgänliga tider</MudText>
+
+        @if (timeSlots == null)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else if (timeSlots.Any())
+        {
+            @* ADD SAFE GROUPING WITH NULL CHECKS *@
+            @foreach (var dateGroup in timeSlots.Where(ts => ts != null && ts.IsAvailable).GroupBy(ts => ts.AppointmentDate.Date))
+            {
+                <MudText Typo="Typo.h6" Class="mb-2">@dateGroup.Key.ToString("dddd, MMMM dd")</MudText>
+                <MudGrid Class="mb-4">
+                    @foreach (var slot in dateGroup.Where(ts => ts != null).OrderBy(ts => ts.StartTime))
+                    {
+                        <MudItem xs="6" sm="4" md="3">
+                            <MudButton Variant="@(selectedtimeSlot?.Id == slot.Id ? Variant.Filled : Variant.Outlined)"
+                                       FullWidth="true"
+                                       Color="@(selectedtimeSlot?.Id == slot.Id ? Color.Primary : Color.Secondary)"
+                                       OnClick="() => SelectTimeSlot(slot)">@slot.StartTime.ToString("hh':'mm") - @slot.EndTime.ToString("hh':'mm")
+                            </MudButton>
+                        </MudItem>
+                    }
+                </MudGrid>
+            }
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Warning">inga tider tillgängliga</MudAlert>
+        }
+    </MudPaper>
+
+    @* Booking Form appears only when both service and timeslot has been choosen *@
+    @if (selectedservice != null && selectedtimeSlot != null)
+    {
+        <MudPaper Class="pa-4 mb-4">
+            <MudText Typo="Typo.h5" Class="mb-3">Slutför din bokning</MudText>
+
+            <MudAlert Severity="Severity.Info" Class="mb-3">
+                <strong>Vald tbätt typ:</strong> @selectedservice.Name (@selectedservice.Price kr)<br />
+                <strong>Vald tid:</strong> @selectedtimeSlot.AppointmentDate.ToString("dddd, MMMM dd") kl @selectedtimeSlot.StartTime.ToString(@"hh\:mm")
+            </MudAlert>
+
+            <MudForm @ref="form">
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="licensePlate"
+                                      Label="Registreringsnummer"
+                                      Required="true"
+                                      RequiredError="Registreringsnummer krävs" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="email"
+                                      Label="E-post"
+                                      Required="true"
+                                      RequiredError="E-post krävs" />
+                    </MudItem>
+                </MudGrid>
+
+                <MudGrid Class="mt-4">
+                    <MudItem xs="12">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Success"
+                                   OnClick="CreateBooking">
+                            <span>Boka Nu</span>
+                        </MudButton>
+
+                        <MudButton Variant="Variant.Text"
+                                   OnClick="ClearSelection"
+                                   Class="ml-2">
+                            Rensa
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudForm>
+        </MudPaper>
+    }
+
+    @* Messages *@
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <MudAlert Class="mt-4">@message</MudAlert>
+    }
+</MudContainer>
+
+@code {
+    private List<TimeSlotDTO>? timeSlots;
+    private List<ServiceTypeDTO>? serviceTypes;
+    private string licensePlate = string.Empty;
+    private string email = string.Empty;
+    private MudForm form;
+    private TimeSlotDTO? selectedtimeSlot;
+    private ServiceTypeDTO? selectedservice;
+    private string message = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.WhenAll(LoadTimeSlots(), LoadServices());
+    }
+
+
+    private async Task CreateBooking()
+    {
+         
+        message = $"Skickar: ServiceID={selectedservice?.Id}, TimeSlotID={selectedtimeSlot?.Id}";
+        StateHasChanged();
+        await Task.Delay(2000);
+
+        var success = await bookingService.CreateBooking(licensePlate, email, selectedservice.Id, selectedtimeSlot.Id);
+
+        if (success == true)
+        {
+            message = "Bokning skapad";
+            ClearSelection();
+            await LoadTimeSlots(); //refresh timeslots
+        }
+
+        else
+        {
+            message = "skapandet av bokning misslyckades, försök igen";
+        }
+    }
+
+    private async Task LoadTimeSlots()
+    {
+
+        timeSlots = await bookingService.GetTimeslots();
+        if (timeSlots != null)
+        {
+            foreach (var slot in timeSlots.Take(5)) // Visa första 5
+            {
+                Console.WriteLine($"TimeSlot ID: {slot.Id}, Time: {slot.StartTime}, Available: {slot.IsAvailable}");
+            }
+        }
+
+    }
+
+
+    private async Task LoadServices()
+    {
+        serviceTypes = await bookingService.GetServiceTypes();
+    }
+
+    private void SelectService(ServiceTypeDTO serviceType)
+    {
+        selectedservice = serviceType;
+        StateHasChanged();
+    }
+
+    private void SelectTimeSlot(TimeSlotDTO timeSlot)
+    {
+        if(timeSlot != null)
+        {
+            selectedtimeSlot = timeSlot;
+            message = $"Vald TimeSlot ID: {timeSlot.Id} - {timeSlot.StartTime}";
+            StateHasChanged();
+        }
+      
+    }
+
+
+    private void ClearSelection()
+    {
+        selectedtimeSlot = null;
+        selectedservice = null;
+        licensePlate = string.Empty;
+        email = string.Empty;
+        message = string.Empty;
+    }
+
+}

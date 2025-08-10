@@ -1,4 +1,6 @@
 using Customer.UI.Components;
+using Customer.UI.Services;
+using MudBlazor.Services;
 
 namespace Customer.UI
 {
@@ -11,7 +13,9 @@ namespace Customer.UI
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
-
+            builder.Services.AddHttpClient<BookingService>();
+            builder.Services.AddScoped<BookingService>();
+            builder.Services.AddMudServices();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

@@ -19,7 +19,17 @@ namespace Backend.API
             builder.Services.AddScoped<ServiceTypesService>();
             builder.Services.AddScoped<BookingServices>();
             builder.Services.AddControllers();
- 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CustomerUI", policy =>
+                {
+                    policy.WithOrigins("https://localhost:7027")  
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -35,7 +45,7 @@ namespace Backend.API
 
             app.UseHttpsRedirection();
 
-            app.UseCors("AllowReactApp");
+            app.UseCors("CustomerUI");
             app.UseAuthorization();
 
 

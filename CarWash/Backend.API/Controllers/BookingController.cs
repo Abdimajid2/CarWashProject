@@ -1,7 +1,9 @@
 ﻿using Backend.API.Models;
+using Backend.API.Requests;
 using Backend.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Models.ModelDTO;
+using System.Diagnostics;
 
 namespace Backend.API.Controllers
 {
@@ -52,10 +54,13 @@ namespace Backend.API.Controllers
         [HttpPost("createbooking")]
         public async Task<ActionResult> CreateBooking([FromBody] BookingRequest request)
         {
+            Debug.WriteLine($"=== CONTROLLER DEBUG ===");
+            Debug.WriteLine($"Controller received ServiceTypeId: {request.serviceTypeId}");
+            Debug.WriteLine($"Controller received TimeSlotId: {request.timeSlotId}");
             try
             {
-                var booking = await _bookingServices.CreateBookingAsync(request.LicensePlate, request.email,
-                    request.timeSlotId, request.serviceTypeId);
+                var booking = await _bookingServices.CreateBookingAsync(request.licensePlate, request.email,
+                    request.serviceTypeId, request.timeSlotId);
 
                 if(booking == null)
                 {

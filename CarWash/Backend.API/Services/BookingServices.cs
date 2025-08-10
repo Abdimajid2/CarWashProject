@@ -14,7 +14,7 @@ namespace Backend.API.Services
             _context = context; 
 
         }
-        public async Task<Booking?> CreateBookingAsync(string LicensePlate, string email, int serviceTypeId, int timeSlotId)
+        public async Task<Booking?> CreateBookingAsync(string licensePlate, string email, int serviceTypeId, int timeSlotId)
         {
             try
             {
@@ -35,7 +35,7 @@ namespace Backend.API.Services
                 //create new booking
                 var newBooking = new Booking
                 {
-                    LicensePlate = LicensePlate.ToUpper(),
+                    LicensePlate = licensePlate.ToUpper(),
                     Email = email,
                     ServiceTypeId = serviceTypeId,
                     TimeSlotId = timeSlotId,
