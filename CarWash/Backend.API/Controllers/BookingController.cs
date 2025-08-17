@@ -54,9 +54,6 @@ namespace Backend.API.Controllers
         [HttpPost("createbooking")]
         public async Task<ActionResult> CreateBooking([FromBody] BookingRequest request)
         {
-            Debug.WriteLine($"=== CONTROLLER DEBUG ===");
-            Debug.WriteLine($"Controller received ServiceTypeId: {request.serviceTypeId}");
-            Debug.WriteLine($"Controller received TimeSlotId: {request.timeSlotId}");
             try
             {
                 var booking = await _bookingServices.CreateBookingAsync(request.licensePlate, request.email,

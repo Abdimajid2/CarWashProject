@@ -4,143 +4,228 @@
 @inject BookingService bookingService
 <PageTitle>Home</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
-    <MudText Typo="Typo.h4" Class="mb-4">Car Wash Booking</MudText>
-
-    @* Service Types Section *@
-    <MudPaper Class="pa-4 mb-4">
-        <MudText Typo="Typo.h5" Class="mb-3">Tillgängliga tvätt alternativ</MudText>
+<!-- Service Types Section -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-3">Tillgängliga tvätt alternativ</h5>
 
         @if (serviceTypes == null)
         {
-            <MudProgressCircular Indeterminate="true" />
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Laddar...</span>
+                </div>
+            </div>
         }
+
         else if (serviceTypes.Any())
         {
-            <MudGrid>
+            <div class="row">
                 @foreach (var service in serviceTypes)
                 {
-                    <MudItem xs="12" sm="6" md="4">
-                        <MudCard Style="@(selectedservice?.Id == service.Id ? "border: 2px solid #1976d2;" : "")">
-                            <MudCardContent>
-                                <MudText Typo="Typo.h6">@service.Name</MudText>
-                                <MudText Typo="Typo.body2" Class="mb-2">@service.Description</MudText>
-                                <MudText Typo="Typo.h6" Color="Color.Primary">@service.Price kr</MudText>
-                            </MudCardContent>
-                            <MudCardActions>
-                                <MudButton Variant="@(selectedservice?.Id == service.Id ? Variant.Filled : Variant.Outlined)"
-                                           Color="Color.Primary"
-                                           OnClick="() => SelectService(service)">
-                                    @(selectedservice?.Id == service.Id ? "Vald" : "Välj Service")
-                                </MudButton>
-                            </MudCardActions>
-                        </MudCard>
-                    </MudItem>
+                    <div class="col-12 col-sm-6 col-md-4 mb-3">
+                        <div class="card h-100 @(selectedservice?.Id == service.Id ? "border-primary" : "")"
+                             style="@(selectedservice?.Id == service.Id ? "border-width: 2px;" : "")">
+                            <div class="card-body d-flex flex-column">
+                                <h6 class="card-title">@service.Name</h6>
+                                <p class="card-text text-muted mb-2">@service.Description</p>
+                                <h6 class="text-primary mb-3">@service.Price kr</h6>
+                                <div class="mt-auto">
+                                    <button class="btn w-100 @(selectedservice?.Id == service.Id ? "btn-primary" : "btn-outline-primary")"
+                                            @onclick="() => SelectService(service)">
+                                        @(selectedservice?.Id == service.Id ? "Vald" : "Välj Service")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 }
-            </MudGrid>
+            </div>
         }
         else
         {
-            <MudAlert Severity="Severity.Warning">Inga tvätt alternativ tillgängligt</MudAlert>
+            <div class="alert alert-warning" role="alert">
+                Inga tvätt alternativ tillgängligt
+            </div>
         }
-    </MudPaper>
+    </div>
+</div>
 
-    @* Time Slots Section *@
-    <MudPaper Class="pa-4 mb-4">
-        <MudText Typo="Typo.h5" Class="mb-3">Tillgänliga tider</MudText>
+<!-- Time Slots Section -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-3">Tillgängliga tider</h5>
 
         @if (timeSlots == null)
         {
-            <MudProgressCircular Indeterminate="true" />
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
         }
         else if (timeSlots.Any())
         {
-            @* ADD SAFE GROUPING WITH NULL CHECKS *@
             @foreach (var dateGroup in timeSlots.Where(ts => ts != null && ts.IsAvailable).GroupBy(ts => ts.AppointmentDate.Date))
             {
-                <MudText Typo="Typo.h6" Class="mb-2">@dateGroup.Key.ToString("dddd, MMMM dd")</MudText>
-                <MudGrid Class="mb-4">
+                <h6 class="mb-2">@dateGroup.Key.ToString("dddd, MMMM dd")</h6>
+                <div class="row mb-4">
                     @foreach (var slot in dateGroup.Where(ts => ts != null).OrderBy(ts => ts.StartTime))
                     {
-                        <MudItem xs="6" sm="4" md="3">
-                            <MudButton Variant="@(selectedtimeSlot?.Id == slot.Id ? Variant.Filled : Variant.Outlined)"
-                                       FullWidth="true"
-                                       Color="@(selectedtimeSlot?.Id == slot.Id ? Color.Primary : Color.Secondary)"
-                                       OnClick="() => SelectTimeSlot(slot)">@slot.StartTime.ToString("hh':'mm") - @slot.EndTime.ToString("hh':'mm")
-                            </MudButton>
-                        </MudItem>
+                        <div class="col-6 col-sm-4 col-md-3 mb-2">
+                            <button class="btn @(selectedtimeSlot?.Id == slot.Id ? "btn-primary" : "btn-outline-secondary") w-100"
+                                    onclick="@(() => SelectTimeSlot(slot))">
+                                @slot.StartTime.ToString("hh':'mm") - @slot.EndTime.ToString("hh':'mm")
+                            </button>
+                        </div>
                     }
-                </MudGrid>
+                </div>
             }
         }
         else
         {
-            <MudAlert Severity="Severity.Warning">inga tider tillgängliga</MudAlert>
+            <div class="alert alert-warning" role="alert">
+                Inga tider tillgängliga
+            </div>
         }
-    </MudPaper>
+    </div>
+</div>
 
-    @* Booking Form appears only when both service and timeslot has been choosen *@
-    @if (selectedservice != null && selectedtimeSlot != null)
-    {
-        <MudPaper Class="pa-4 mb-4">
-            <MudText Typo="Typo.h5" Class="mb-3">Slutför din bokning</MudText>
+<!-- Success Modal -->
+<div class="modal fade @(showSuccessModal ? "show" : "")"
+     style="display: @(showSuccessModal ? "block" : "none")"
+     tabindex="-1"
+     aria-labelledby="successModalLabel"
+     aria-hidden="@(!showSuccessModal)">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="successModalLabel">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Bokning Bekräftad!
+                </h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="text-success mb-3">Tack för din bokning!</h4>
 
-            <MudAlert Severity="Severity.Info" Class="mb-3">
-                <strong>Vald tbätt typ:</strong> @selectedservice.Name (@selectedservice.Price kr)<br />
+                @if (lastBookedService != null && lastBookedTimeSlot != null)
+                {
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Bokningsdetaljer:</h6>
+                            <p class="card-text mb-1">
+                                <strong>Service:</strong> @lastBookedService.Name
+                            </p>
+                            <p class="card-text mb-1">
+                                <strong>Datum:</strong> @lastBookedTimeSlot.AppointmentDate.ToString("dddd, MMMM dd yyyy")
+                            </p>
+                            <p class="card-text mb-1">
+                                <strong>Tid:</strong> @lastBookedTimeSlot.StartTime.ToString(@"hh\:mm")
+                            </p>
+                            <p class="card-text mb-0">
+                                <strong>Pris:</strong> @lastBookedService.Price kr
+                            </p>
+                        </div>
+                    </div>
+                }
+
+                <p class="mt-3 text-muted">
+                    Du kommer att få en bekräftelse via e-post.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-success"
+                        @onclick="CloseSuccessModal">
+                    Boka Ny Tid
+                </button>
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        @onclick="CloseSuccessModal">
+                    Stäng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Booking Form appears only when both service and timeslot has been chosen -->
+@if (selectedservice != null && selectedtimeSlot != null)
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Slutför din bokning</h5>
+
+            <div class="alert alert-info mb-3" role="alert">
+                <strong>Vald tvätt typ:</strong> @selectedservice.Name (@selectedservice.Price kr)<br />
                 <strong>Vald tid:</strong> @selectedtimeSlot.AppointmentDate.ToString("dddd, MMMM dd") kl @selectedtimeSlot.StartTime.ToString(@"hh\:mm")
-            </MudAlert>
+            </div>
 
-            <MudForm @ref="form">
-                <MudGrid>
-                    <MudItem xs="12" md="6">
-                        <MudTextField @bind-Value="licensePlate"
-                                      Label="Registreringsnummer"
-                                      Required="true"
-                                      RequiredError="Registreringsnummer krävs" />
-                    </MudItem>
-                    <MudItem xs="12" md="6">
-                        <MudTextField @bind-Value="email"
-                                      Label="E-post"
-                                      Required="true"
-                                      RequiredError="E-post krävs" />
-                    </MudItem>
-                </MudGrid>
+            <form>
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label for="licensePlate" class="form-label">Registreringsnummer</label>
+                        <input type="text"
+                               class="form-control"
+                               id="licensePlate"
+                               @bind="licensePlate"
+                               required>
+                        <div class="invalid-feedback">
+                            Registreringsnummer krävs
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 mb-3">
+                        <label for="email" class="form-label">E-post</label>
+                        <input type="email"
+                               class="form-control"
+                               id="email"
+                               @bind="email"
+                               required>
+                        <div class="invalid-feedback">
+                            E-post krävs
+                        </div>
+                    </div>
+                </div>
 
-                <MudGrid Class="mt-4">
-                    <MudItem xs="12">
-                        <MudButton Variant="Variant.Filled"
-                                   Color="Color.Success"
-                                   OnClick="CreateBooking">
-                            <span>Boka Nu</span>
-                        </MudButton>
-
-                        <MudButton Variant="Variant.Text"
-                                   OnClick="ClearSelection"
-                                   Class="ml-2">
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <button type="button"
+                                class="btn btn-success me-2"
+                                onclick="@CreateBooking">
+                            Boka Nu
+                        </button>
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                onclick="@ClearSelection">
                             Rensa
-                        </MudButton>
-                    </MudItem>
-                </MudGrid>
-            </MudForm>
-        </MudPaper>
-    }
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+}
 
-    @* Messages *@
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <MudAlert Class="mt-4">@message</MudAlert>
-    }
-</MudContainer>
+
 
 @code {
     private List<TimeSlotDTO>? timeSlots;
     private List<ServiceTypeDTO>? serviceTypes;
     private string licensePlate = string.Empty;
     private string email = string.Empty;
-    private MudForm form;
     private TimeSlotDTO? selectedtimeSlot;
     private ServiceTypeDTO? selectedservice;
-    private string message = string.Empty;
+    private string errormessage = string.Empty;
+
+    //fo modal
+    private bool showSuccessModal = false;
+    private bool isCreatingBooking = false;
+    private ServiceTypeDTO? lastBookedService;
+    private TimeSlotDTO? lastBookedTimeSlot;
 
     protected override async Task OnInitializedAsync()
     {
@@ -150,23 +235,52 @@
 
     private async Task CreateBooking()
     {
-         
-        message = $"Skickar: ServiceID={selectedservice?.Id}, TimeSlotID={selectedtimeSlot?.Id}";
-        StateHasChanged();
-        await Task.Delay(2000);
-
-        var success = await bookingService.CreateBooking(licensePlate, email, selectedservice.Id, selectedtimeSlot.Id);
-
-        if (success == true)
+        if (string.IsNullOrEmpty(licensePlate) || string.IsNullOrEmpty(email))
         {
-            message = "Bokning skapad";
-            ClearSelection();
-            await LoadTimeSlots(); //refresh timeslots
+            errormessage = "Vänligen fyll i alla obligatoriska fält.";
+            return;
+        }
+        if (selectedservice == null || selectedtimeSlot == null)
+        {
+            errormessage = "vänligen välj både tvätt och tid";
+            return;
         }
 
-        else
+        // Clear errors
+        errormessage = string.Empty;
+        isCreatingBooking = true;
+        StateHasChanged();
+
+        try
         {
-            message = "skapandet av bokning misslyckades, försök igen";
+
+            var success = await bookingService.CreateBooking(licensePlate, email, selectedservice.Id, selectedtimeSlot.Id);
+            if (success == true)
+            {
+
+
+                //for modal
+                lastBookedService = selectedservice;
+                lastBookedTimeSlot = selectedtimeSlot;
+
+                showSuccessModal = true;
+
+                ClearSelection();
+
+                //refresh timeslots
+                await LoadTimeSlots();
+
+            }
+            else
+            {
+                errormessage = "skapandet av bokning misslyckades, försök igen";
+            }
+        }
+
+        catch(Exception e)
+        {
+            errormessage = $"Ett fel uppstod {e.Message}";
+           
         }
     }
 
@@ -174,13 +288,7 @@
     {
 
         timeSlots = await bookingService.GetTimeslots();
-        if (timeSlots != null)
-        {
-            foreach (var slot in timeSlots.Take(5)) // Visa första 5
-            {
-                Console.WriteLine($"TimeSlot ID: {slot.Id}, Time: {slot.StartTime}, Available: {slot.IsAvailable}");
-            }
-        }
+
 
     }
 
@@ -198,13 +306,12 @@
 
     private void SelectTimeSlot(TimeSlotDTO timeSlot)
     {
-        if(timeSlot != null)
+        if (timeSlot != null)
         {
             selectedtimeSlot = timeSlot;
-            message = $"Vald TimeSlot ID: {timeSlot.Id} - {timeSlot.StartTime}";
             StateHasChanged();
         }
-      
+
     }
 
 
@@ -214,7 +321,13 @@
         selectedservice = null;
         licensePlate = string.Empty;
         email = string.Empty;
-        message = string.Empty;
+        errormessage = string.Empty;
+    }
+
+    private void CloseSuccessModal()
+    {
+        showSuccessModal = false;
+        StateHasChanged();
     }
 
 }

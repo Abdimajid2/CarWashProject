@@ -18,15 +18,17 @@ namespace Backend.API.Services
         {
             try
             {
-                //check if timeslot is available
+                
                 var timeslot = await _context.TimeSlots.FindAsync(timeSlotId);
+                //check if timeslot is available
                 if (timeslot == null || timeslot.IsAvailable != true)
                 {
                     return null;
                 }
 
-                //check if service type exist
+                
                 var serviceTypes = await _context.ServiceTypes.FindAsync(serviceTypeId);
+                //check if service type exist
                 if (serviceTypes == null)
                 {
                     return null;
