@@ -1,7 +1,9 @@
-﻿using Backend.API.Models;
+﻿using Backend.API.Data;
+using Backend.API.Models;
 using Backend.API.Requests;
 using Backend.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shared.Models.ModelDTO;
 using System.Diagnostics;
 
@@ -13,12 +15,14 @@ namespace Backend.API.Controllers
     {
         private readonly ServiceTypesService _services;
         private readonly BookingServices _bookingServices;
-     
+        private readonly IServiceProvider _serviceProvider;
 
-        public BookingController(ServiceTypesService services, BookingServices bookingServices)
+        public BookingController(ServiceTypesService services, BookingServices bookingServices, IServiceProvider serviceProvider)
         {
             _services = services;
             _bookingServices = bookingServices;
+            _serviceProvider = serviceProvider;
+
              
         }
 
@@ -74,6 +78,15 @@ namespace Backend.API.Controllers
             {
                 return BadRequest($"Failed to create booking: {e.Message}");
             }
+        }
+
+        [HttpPost("test-timeslots")]
+        public async Task<IActionResult> TestTimeSlots()
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var count = await context.TimeSlots.CountAsync();
+            return Ok(new { message = $"Currently have {count} time slots" });
         }
     }
 }

@@ -24,30 +24,6 @@ namespace Backend.API.Seeds
             };
             context.ServiceTypes.AddRange(serviceTypes);
             context.SaveChanges();
-
-            var timeSlots = new List<TimeSlot>();
-            var startDate = DateTime.UtcNow.Date;
-
-            for (int day = 0; day < 7; day++)
-            {
-                var currentDate = startDate.AddDays(day);
-
-                // Create hourly slots from 9 AM to 5 PM
-                for (int hour = 9; hour < 17; hour++)
-                {
-                    timeSlots.Add(new TimeSlot
-                    {
-                        StartTime = new TimeSpan(hour, 0, 0),
-                        EndTime = new TimeSpan(hour + 1, 0, 0),
-                        AppointmentDate = currentDate,
-                        IsAvailable = true
-                    });
-                }
-            }
-
-            context.TimeSlots.AddRange(timeSlots);
-            context.SaveChanges();
-
         }
     }
 }

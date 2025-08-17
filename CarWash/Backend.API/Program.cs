@@ -7,7 +7,7 @@ namespace Backend.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +15,7 @@ namespace Backend.API
            
             builder.Services.AddDbContextFactory<AppDbContext>(options => 
             options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLstring")));
-
+            builder.Services.AddHostedService<UpdateTimeslots>();
             builder.Services.AddScoped<ServiceTypesService>();
             builder.Services.AddScoped<BookingServices>();
             builder.Services.AddControllers();
@@ -35,7 +35,13 @@ namespace Backend.API
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
-
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var updateService = new UpdateTimeslots(scope.ServiceProvider);
+                // You'll need to make MaintainTimeSlots method public temporarily
+                await updateService.MaintainTimeSlots(context);
+            }
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
