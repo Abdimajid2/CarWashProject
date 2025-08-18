@@ -2,7 +2,8 @@
 
 Detta är ett hobbyprojekt för en biltvättsverksamhet med fokus bokning. Besökaren väljer först ett tvättalternativ, väljer sedan en ledig tid och slutför bokningen genom att ange registreringsnummer och e-postadress.
 
-<img width="1606" height="948" alt="Skärmbild 2025-08-18 211848" src="https://github.com/user-attachments/assets/06165d2d-d878-4d16-a916-b94c3cca9787" />
+ 
+<img width="1448" height="933" alt="Skärmbild 2025-08-18 211941" src="https://github.com/user-attachments/assets/00206566-2a04-4ec7-8939-f9f830ac2761" />
 
 
 Denna vy visas först efter att besökaren valt tvättalternativ och ledig tid
