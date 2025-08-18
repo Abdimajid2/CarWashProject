@@ -4,214 +4,234 @@
 @inject BookingService bookingService
 <PageTitle>Home</PageTitle>
 
-<h1>Välkommen!</h1>
+<div class="min-vh-100 bg-white py-4">
+    <div class="container">
+        <!-- Dark header -->
+        <div class="bg-white text-dark p-4 rounded-4 mb-4 shadow-lg text-center">
+            <h1 class="fw-bold mb-2">Välkommen till Eskilstuna biltvätt!</h1>
+            <p class="mb-0 fs-5">Boka professionella biltvätt snabbt och enkelt</p>
+        </div>
 
-<!-- Service Types Section -->
-<div class="card mb-4">
-    <div class="card-body">
-        <h5 class="card-title mb-3">Tillgängliga tvätt alternativ</h5>
+        <!-- Service Types Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title text-primary mb-4">
+                    <i class="bi bi-stars me-2"></i>Tillgängliga tvätt alternativ
+                </h5>
 
-        @if (serviceTypes == null)
-        {
-            <div class="d-flex justify-content-center">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Laddar...</span>
-                </div>
-            </div>
-        }
-
-        else if (serviceTypes.Any())
-        {
-            <div class="row">
-                @foreach (var service in serviceTypes)
+                @if (serviceTypes == null)
                 {
-                    <div class="col-12 col-sm-6 col-md-4 mb-3">
-                        <div class="card h-100 @(selectedservice?.Id == service.Id ? "border-primary" : "")"
-                             style="@(selectedservice?.Id == service.Id ? "border-width: 2px;" : "")">
-                            <div class="card-body d-flex flex-column">
-                                <h6 class="card-title">@service.Name</h6>
-                                <p class="card-text text-muted mb-2">@service.Description</p>
-                                <h6 class="text-primary mb-3">@service.Price kr</h6>
-                                <div class="mt-auto">
-                                    <button class="btn w-100 @(selectedservice?.Id == service.Id ? "btn-primary" : "btn-outline-primary")"
-                                            @onclick="() => SelectService(service)">
-                                        @(selectedservice?.Id == service.Id ? "Vald" : "Välj Service")
-                                    </button>
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Laddar...</span>
+                        </div>
+                    </div>
+                }
+                else if (serviceTypes.Any())
+                {
+                    <div class="row">
+                        @foreach (var service in serviceTypes)
+                        {
+                            <div class="col-12 col-sm-6 col-md-4 mb-3">
+                                <div class="card h-100 border-2 @(selectedservice?.Id == service.Id ? "service-card-selected" : "border-light") shadow-sm">
+                                    <div class="card-body d-flex flex-column text-center">
+                                        <i class="bi bi-car-front fs-1 text-primary mb-3"></i>
+                                        <h6 class="card-title fw-bold">@service.Name</h6>
+                                        <p class="card-text text-muted mb-3">@service.Description</p>
+                                        <h5 class="text-primary fw-bold mb-3">@service.Price kr</h5>
+                                        <div class="mt-auto">
+                                            <button class="btn w-100 @(selectedservice?.Id == service.Id ? "btn-primary" : "btn-outline-primary")"
+                                                    @onclick="() => SelectService(service)">
+                                                @(selectedservice?.Id == service.Id ? "✓ Vald" : "Välj Service")
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Inga tvätt alternativ tillgängligt
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Time Slots Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title text-success mb-4">
+                    <i class="bi bi-calendar-check me-2"></i>Tillgängliga tider
+                </h5>
+
+                @if (timeSlots == null)
+                {
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                }
+                else if (timeSlots.Any())
+                {
+                    @foreach (var dateGroup in timeSlots.Where(ts => ts != null && ts.IsAvailable).GroupBy(ts => ts.AppointmentDate.Date))
+                    {
+                        <div class="bg-light rounded-3 p-3 mb-3">
+                            <h6 class="fw-bold text-center mb-3">
+                                <i class="bi bi-calendar-date me-2"></i>
+                                @dateGroup.Key.ToString("dddd, MMMM dd")
+                            </h6>
+                            <div class="row">
+                                @foreach (var slot in dateGroup.Where(ts => ts != null).OrderBy(ts => ts.StartTime))
+                                {
+                                    <div class="col-6 col-sm-4 col-md-3 mb-2">
+                                        <button class="btn w-100 @(selectedtimeSlot?.Id == slot.Id ? "btn-primary" : "btn-outline-secondary")"
+                                                @onclick="@(() => SelectTimeSlot(slot))">
+                                            <i class="bi bi-clock me-1"></i>
+                                            @slot.StartTime.ToString("hh':'mm") - @slot.EndTime.ToString("hh':'mm")
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Inga tider tillgängliga
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Booking Form -->
+        @if (selectedservice != null && selectedtimeSlot != null)
+        {
+            <div class="card shadow-sm mb-4 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>Slutför din bokning
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-primary border-0 mb-4" role="alert">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong><i class="bi bi-car-front me-2"></i>Service:</strong> @selectedservice.Name (@selectedservice.Price kr)
+                            </div>
+                            <div class="col-md-6">
+                                <strong><i class="bi bi-calendar me-2"></i>Tid:</strong> @selectedtimeSlot.AppointmentDate.ToString("dddd, MMMM dd") kl @selectedtimeSlot.StartTime.ToString(@"hh\:mm")
                             </div>
                         </div>
                     </div>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-warning" role="alert">
-                Inga tvätt alternativ tillgängligt
-            </div>
-        }
-    </div>
-</div>
 
-<!-- Time Slots Section -->
-<div class="card mb-4">
-    <div class="card-body">
-        <h5 class="card-title mb-3">Tillgängliga tider</h5>
-
-        @if (timeSlots == null)
-        {
-            <div class="d-flex justify-content-center">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        }
-        else if (timeSlots.Any())
-        {
-            @foreach (var dateGroup in timeSlots.Where(ts => ts != null && ts.IsAvailable).GroupBy(ts => ts.AppointmentDate.Date))
-            {
-                <h6 class="mb-2">@dateGroup.Key.ToString("dddd, MMMM dd")</h6>
-                <div class="row mb-4">
-                    @foreach (var slot in dateGroup.Where(ts => ts != null).OrderBy(ts => ts.StartTime))
-                    {
-                        <div class="col-6 col-sm-4 col-md-3 mb-2">
-                            <button class="btn @(selectedtimeSlot?.Id == slot.Id ? "btn-primary" : "btn-outline-secondary") w-100"
-                                    onclick="@(() => SelectTimeSlot(slot))">
-                                @slot.StartTime.ToString("hh':'mm") - @slot.EndTime.ToString("hh':'mm")
-                            </button>
+                    <form>
+                        <div class="row">
+                            <div class="col-12 col-md-6 mb-3">
+                                <label for="licensePlate" class="form-label fw-bold">
+                                    <i class="bi bi-card-text me-2 text-primary"></i>Registreringsnummer
+                                </label>
+                                <input type="text"
+                                       class="form-control form-control-lg"
+                                       id="licensePlate"
+                                       @bind="licensePlate"
+                                       placeholder="ABC123"
+                                       required>
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <label for="email" class="form-label fw-bold">
+                                    <i class="bi bi-envelope me-2 text-primary"></i>E-post
+                                </label>
+                                <input type="email"
+                                       class="form-control form-control-lg"
+                                       id="email"
+                                       @bind="email"
+                                       placeholder="din@email.com"
+                                       required>
+                            </div>
                         </div>
-                    }
-                </div>
-            }
-        }
-        else
-        {
-            <div class="alert alert-warning" role="alert">
-                Inga tider tillgängliga
-            </div>
-        }
-    </div>
-</div>
 
-<!-- Success Modal -->
-<div class="modal fade @(showSuccessModal ? "show" : "")"
-     style="display: @(showSuccessModal ? "block" : "none")"
-     tabindex="-1"
-     aria-labelledby="successModalLabel"
-     aria-hidden="@(!showSuccessModal)">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="successModalLabel">
-                    <i class="bi bi-check-circle me-2"></i>
-                    Bokning Bekräftad!
-                </h5>
-            </div>
-            <div class="modal-body text-center">
-                <div class="mb-3">
-                    <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
-                </div>
-                <h4 class="text-success mb-3">Tack för din bokning!</h4>
-
-                @if (lastBookedService != null && lastBookedTimeSlot != null)
-                {
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h6 class="card-title">Bokningsdetaljer:</h6>
-                            <p class="card-text mb-1">
-                                <strong>Service:</strong> @lastBookedService.Name
-                            </p>
-                            <p class="card-text mb-1">
-                                <strong>Datum:</strong> @lastBookedTimeSlot.AppointmentDate.ToString("dddd, MMMM dd yyyy")
-                            </p>
-                            <p class="card-text mb-1">
-                                <strong>Tid:</strong> @lastBookedTimeSlot.StartTime.ToString(@"hh\:mm")
-                            </p>
-                            <p class="card-text mb-0">
-                                <strong>Pris:</strong> @lastBookedService.Price kr
-                            </p>
+                        <div class="row mt-4">
+                            <div class="col-12 text-center">
+                                <button type="button"
+                                        class="btn btn-success btn-lg me-3 px-5"
+                                        @onclick="@CreateBooking">
+                                    <i class="bi bi-check-circle me-2"></i>Boka Nu
+                                </button>
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        @onclick="@ClearSelection">
+                                    <i class="bi bi-arrow-counterclockwise me-2"></i>Rensa
+                                </button>
+                            </div>
                         </div>
+                    </form>
+                </div>
+            </div>
+        }
+
+        <div class="modal fade @(showSuccessModal ? "show" : "")"
+             style="display: @(showSuccessModal ? "block" : "none")"
+             tabindex="-1"
+             aria-labelledby="successModalLabel"
+             aria-hidden="@(!showSuccessModal)">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-success text-white border-0">
+                        <h5 class="modal-title" id="successModalLabel">
+                            <i class="bi bi-check-circle-fill me-2"></i>Bokning Bekräftad!
+                        </h5>
                     </div>
-                }
-
-                <p class="mt-3 text-muted">
-                    Du kommer att få en bekräftelse via e-post.
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button"
-                        class="btn btn-success"
-                        @onclick="CloseSuccessModal">
-                    Boka Ny Tid
-                </button>
-                <button type="button"
-                        class="btn btn-outline-secondary"
-                        @onclick="CloseSuccessModal">
-                    Stäng
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- Booking Form appears only when both service and timeslot has been chosen -->
-@if (selectedservice != null && selectedtimeSlot != null)
-{
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title mb-3">Slutför din bokning</h5>
-
-            <div class="alert alert-info mb-3" role="alert">
-                <strong>Vald tvätt typ:</strong> @selectedservice.Name (@selectedservice.Price kr)<br />
-                <strong>Vald tid:</strong> @selectedtimeSlot.AppointmentDate.ToString("dddd, MMMM dd") kl @selectedtimeSlot.StartTime.ToString(@"hh\:mm")
-            </div>
-
-            <form>
-                <div class="row">
-                    <div class="col-12 col-md-6 mb-3">
-                        <label for="licensePlate" class="form-label">Registreringsnummer</label>
-                        <input type="text"
-                               class="form-control"
-                               id="licensePlate"
-                               @bind="licensePlate"
-                               required>
-                        <div class="invalid-feedback">
-                            Registreringsnummer krävs
+                    <div class="modal-body text-center p-4">
+                        <div class="mb-4">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
                         </div>
-                    </div>
-                    <div class="col-12 col-md-6 mb-3">
-                        <label for="email" class="form-label">E-post</label>
-                        <input type="email"
-                               class="form-control"
-                               id="email"
-                               @bind="email"
-                               required>
-                        <div class="invalid-feedback">
-                            E-post krävs
-                        </div>
-                    </div>
-                </div>
+                        <h4 class="text-success mb-4">Tack för din bokning!</h4>
 
-                <div class="row mt-4">
-                    <div class="col-12">
+                        @if (lastBookedService != null && lastBookedTimeSlot != null)
+                        {
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary mb-3">
+                                        <i class="bi bi-info-circle me-2"></i>Bokningsdetaljer
+                                    </h6>
+                                    <div class="row text-start">
+                                        <div class="col-6 fw-bold">Service:</div>
+                                        <div class="col-6">@lastBookedService.Name</div>
+                                        <div class="col-6 fw-bold">Datum:</div>
+                                        <div class="col-6">@lastBookedTimeSlot.AppointmentDate.ToString("dddd, MMMM dd yyyy")</div>
+                                        <div class="col-6 fw-bold">Tid:</div>
+                                        <div class="col-6">@lastBookedTimeSlot.StartTime.ToString(@"hh\:mm")</div>
+                                        <div class="col-6 fw-bold">Pris:</div>
+                                        <div class="col-6 text-success fw-bold">@lastBookedService.Price kr</div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer border-0">
                         <button type="button"
-                                class="btn btn-success me-2"
-                                onclick="@CreateBooking">
-                            Boka Nu
+                                class="btn btn-success"
+                                @onclick="CloseSuccessModal">
+                            <i class="bi bi-plus-circle me-2"></i>Boka Ny Tid
                         </button>
                         <button type="button"
                                 class="btn btn-outline-secondary"
-                                onclick="@ClearSelection">
-                            Rensa
+                                @onclick="CloseSuccessModal">
+                            Stäng
                         </button>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
-}
-
+</div>
 
 
 @code {
@@ -279,10 +299,10 @@
             }
         }
 
-        catch(Exception e)
+        catch (Exception e)
         {
             errormessage = $"Ett fel uppstod {e.Message}";
-           
+
         }
     }
 
