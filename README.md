@@ -7,7 +7,7 @@ Detta är ett hobbyprojekt för en biltvättsverksamhet med fokus på enkel bokn
 
 
 
-Denna vy visas först efter att besökaren valt tvättalternativ och angett registreringsnummer
+Denna vy visas först efter att besökaren valt tvättalternativ och ledig tid
 <img width="934" height="244" alt="Skärmbild 2025-08-18 210513" src="https://github.com/user-attachments/assets/bbdfe727-ef36-4236-979b-16234d4beaab" />
 
 
