@@ -8,7 +8,8 @@ Detta är ett hobbyprojekt för en biltvättsverksamhet med fokus bokning. Besö
 
 Denna vy visas först efter att besökaren valt tvättalternativ och ledig tid
  
-<img width="937" height="245" alt="Skärmbild 2025-08-19 170935" src="https://github.com/user-attachments/assets/ccc01a28-01aa-4380-a76c-3583b65b7ecf" />
+<img width="937" height="245" alt="Skärmbild 2025-08-19 170935" src="https://github.com/user-attachments/assets/b10c0db0-195e-4cde-a1ec-2bff8e7c1413" />
+
 
 
 
