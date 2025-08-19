@@ -15,15 +15,19 @@ namespace Backend.API.Seeds
             context.TimeSlots.RemoveRange(context.TimeSlots);
             context.SaveChanges();
 
-            var serviceTypes = new ServiceTypes[]
+            if (!context.ServiceTypes.Any())
             {
-             new ServiceTypes { Name = "Grundtvätt", Description = "Utvändig tvätt och torkning", Price = 459 },
-             new ServiceTypes { Name = "Premiumtvätt", Description = "Utvändig tvätt + invändig dammsugning", Price = 850 },
-             new ServiceTypes { Name = "Deluxetvätt", Description = "Fullservice med vax", Price = 1500 },
-            new ServiceTypes { Name = "Snabbtvätt", Description = "Snabb utvändig tvätt", Price = 350 }
-            };
-            context.ServiceTypes.AddRange(serviceTypes);
-            context.SaveChanges();
+                var serviceTypes = new ServiceTypes[]
+{
+                 new ServiceTypes { Name = "Grundtvätt", Description = "Utvändig tvätt och torkning", Price = 459 },
+                 new ServiceTypes { Name = "Premiumtvätt", Description = "Utvändig tvätt + invändig dammsugning", Price = 850 },
+                 new ServiceTypes { Name = "Deluxetvätt", Description = "Fullservice med vax", Price = 1500 },
+                 new ServiceTypes { Name = "Snabbtvätt", Description = "Snabb utvändig tvätt", Price = 350 }
+};
+                context.ServiceTypes.AddRange(serviceTypes);
+                context.SaveChanges();
+            }
+
         }
     }
 }

@@ -38,8 +38,10 @@ namespace Backend.API
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                Seeds.SeedDb.seedDb(context);
                 var updateService = new UpdateTimeslots(scope.ServiceProvider);
-                // You'll need to make MaintainTimeSlots method public temporarily
+
                 await updateService.MaintainTimeSlots(context);
             }
             // Configure the HTTP request pipeline.

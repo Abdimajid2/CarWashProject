@@ -10,10 +10,11 @@ namespace Customer.UI.Services
     {
         private readonly HttpClient _httpClient;
 
-        string baseurl = "http://localhost:5184";
+        string baseurl;
         public BookingService(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            baseurl = Environment.GetEnvironmentVariable("API_URL") ?? "http://localhost:5184";
         }
 
         public async Task<List<TimeSlotDTO>> GetTimeslots()
@@ -50,9 +51,6 @@ namespace Customer.UI.Services
 
         public async Task<bool> CreateBooking(string licensePlate, string email, int serviceTypeId, int timeSlotId)
         {
-            Debug.WriteLine($"=== BOOKING SERVICE DEBUG ===");
-            Debug.WriteLine($"Received ServiceTypeId: {serviceTypeId}");
-            Debug.WriteLine($"Received TimeSlotId: {timeSlotId}");
 
             var bookingData = new {licensePlate, email, serviceTypeId, timeSlotId};
 

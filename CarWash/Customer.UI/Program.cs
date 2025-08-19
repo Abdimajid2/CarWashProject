@@ -16,6 +16,12 @@ namespace Customer.UI
             builder.Services.AddHttpClient<BookingService>();
             builder.Services.AddScoped<BookingService>();
             builder.Services.AddMudServices();
+            builder.Services.AddHttpClient("Api", (sp, http) =>
+            {
+                var cfg = sp.GetRequiredService<IConfiguration>();
+                var baseUrl = cfg["ApiBaseUrl"]; 
+                http.BaseAddress = new Uri(baseUrl!);
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
