@@ -1,4 +1,4 @@
-# CarWashProject
+🚧 The website will be live soon. 
 
 This is a project for a car wash business focused on booking. The visitor first selects a wash option, then chooses an available time slot, and completes the booking by entering their license plate number and email address
 
