@@ -10,6 +10,7 @@ namespace Backend.API.Seeds
             //ensure that db is created
             context.Database.EnsureCreated();
 
+            if (context.ServiceTypes.Any())  return;
             //delete existing data
             context.ServiceTypes.RemoveRange(context.ServiceTypes);
             context.TimeSlots.RemoveRange(context.TimeSlots);

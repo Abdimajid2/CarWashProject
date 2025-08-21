@@ -27,13 +27,15 @@ services:
       - db
     environment:
       ConnectionStrings__PostgreSQLstring: "Host=db;Database=carwashdb;Username=postgres;Password=password"
+      ASPNETCORE_URLS: "http://+:80"
+      DISABLE_HTTPS_REDIRECT: "true"
 
   customer-ui:
     build:
       context: .
       dockerfile: Customer.UI/Dockerfile
     ports:
-      - "5000:80"
+      - "5000:8080"
     depends_on:
       - backend-api
     environment:
