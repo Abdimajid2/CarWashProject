@@ -15,6 +15,12 @@ namespace Backend.API
             var connectionStrings = builder.Environment.IsDevelopment() ? builder.Configuration.GetConnectionString("PostgreSQLstring") //for local dev
                 : builder.Configuration.GetConnectionString("PostgreSQLstringDocker"); // for dock env
 
+            if (!string.IsNullOrEmpty(connectionStrings) && connectionStrings.StartsWith("postgres://"))
+            {
+                var uri = new Uri(connectionStrings.Replace("postgres://", "postgresql://"));
+                var userInfo = uri.UserInfo.Split(':');
+                connectionStrings = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.Trim('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+            }
             builder.Services.AddDbContext<AppDbContext>(options =>
            options.UseNpgsql(connectionStrings));
 
@@ -49,7 +55,7 @@ namespace Backend.API
                     {
                         await context.Database.MigrateAsync();
                         Seeds.SeedDb.seedDb(context);                         
-                        var updater = new UpdateTimeslots(scope.ServiceProvider);
+                        var updater = new UpdateTimeslots(scope.ServiceProvider); 
                         await updater.MaintainTimeSlots(context);
                         break;
                     }
