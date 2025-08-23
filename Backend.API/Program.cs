@@ -11,9 +11,12 @@ namespace Backend.API
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-            var connectionStrings = builder.Environment.IsDevelopment() ? builder.Configuration.GetConnectionString("PostgreSQLstring") //for local dev
-                : builder.Configuration.GetConnectionString("PostgreSQLstringDocker"); // for dock env
+ 
+            var connectionStrings = Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSQLstringDocker")
+                ?? Environment.GetEnvironmentVariable("DATABASE_URL")
+                ?? (builder.Environment.IsDevelopment()
+                    ? builder.Configuration.GetConnectionString("PostgreSQLstring")
+                    : builder.Configuration.GetConnectionString("PostgreSQLstringDocker"));
 
             if (!string.IsNullOrEmpty(connectionStrings) && connectionStrings.StartsWith("postgres://"))
             {
