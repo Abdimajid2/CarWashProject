@@ -21,7 +21,7 @@ namespace Backend.API
             Console.WriteLine($"ENV ConnectionStrings__PostgreSQLstringDocker: {Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSQLstringDocker")}");
             Console.WriteLine($"ENV DATABASE_URL: {Environment.GetEnvironmentVariable("DATABASE_URL")}");
 
-            if (!string.IsNullOrEmpty(connectionStrings) && connectionStrings.StartsWith("postgres://"))
+            if (!string.IsNullOrEmpty(connectionStrings) && (connectionStrings.StartsWith("postgres://") || connectionStrings.StartsWith("postgresql://")))
             {
                 var uri = new Uri(connectionStrings.Replace("postgres://", "postgresql://"));
                 var userInfo = uri.UserInfo.Split(':');
