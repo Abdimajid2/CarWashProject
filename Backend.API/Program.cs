@@ -13,10 +13,13 @@ namespace Backend.API
             var builder = WebApplication.CreateBuilder(args);
  
             var connectionStrings = Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSQLstringDocker")
-                ?? Environment.GetEnvironmentVariable("DATABASE_URL")
-                ?? (builder.Environment.IsDevelopment()
+                ?? Environment.GetEnvironmentVariable("DATABASE_URL") ?? (builder.Environment.IsDevelopment()
                     ? builder.Configuration.GetConnectionString("PostgreSQLstring")
                     : builder.Configuration.GetConnectionString("PostgreSQLstringDocker"));
+
+            Console.WriteLine($"Raw connection string: {connectionStrings}");
+            Console.WriteLine($"ENV ConnectionStrings__PostgreSQLstringDocker: {Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSQLstringDocker")}");
+            Console.WriteLine($"ENV DATABASE_URL: {Environment.GetEnvironmentVariable("DATABASE_URL")}");
 
             if (!string.IsNullOrEmpty(connectionStrings) && connectionStrings.StartsWith("postgres://"))
             {
