@@ -11,15 +11,11 @@ namespace Backend.API
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
- 
+
             var connectionStrings = Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSQLstringDocker")
                 ?? Environment.GetEnvironmentVariable("DATABASE_URL") ?? (builder.Environment.IsDevelopment()
                     ? builder.Configuration.GetConnectionString("PostgreSQLstring")
                     : builder.Configuration.GetConnectionString("PostgreSQLstringDocker"));
-
-            Console.WriteLine($"Raw connection string: {connectionStrings}");
-            Console.WriteLine($"ENV ConnectionStrings__PostgreSQLstringDocker: {Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSQLstringDocker")}");
-            Console.WriteLine($"ENV DATABASE_URL: {Environment.GetEnvironmentVariable("DATABASE_URL")}");
 
             if (!string.IsNullOrEmpty(connectionStrings) && (connectionStrings.StartsWith("postgres://") || connectionStrings.StartsWith("postgresql://")))
             {
@@ -36,21 +32,29 @@ namespace Backend.API
             builder.Services.AddScoped<BookingServices>();
             builder.Services.AddControllers();
 
+            var allowedOrigins = (Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")
+                      ?? "https://localhost:7027").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("CustomerUI", policy =>
                 {
-                    policy.WithOrigins("https://localhost:7027")
+                    policy.WithOrigins(allowedOrigins)
                           .AllowAnyHeader()
                           .AllowAnyMethod();
+                    // .AllowCredentials();
                 });
             });
+
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+
+
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -61,8 +65,8 @@ namespace Backend.API
                     try
                     {
                         await context.Database.MigrateAsync();
-                        Seeds.SeedDb.seedDb(context);                         
-                        var updater = new UpdateTimeslots(scope.ServiceProvider); 
+                        Seeds.SeedDb.seedDb(context);
+                        var updater = new UpdateTimeslots(scope.ServiceProvider);
                         await updater.MaintainTimeSlots(context);
                         break;
                     }
@@ -75,6 +79,8 @@ namespace Backend.API
 
             var disableHttpsRedirect = (Environment.GetEnvironmentVariable("DISABLE_HTTPS_REDIRECT") ?? "")
             .Equals("true", StringComparison.OrdinalIgnoreCase);
+ 
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
