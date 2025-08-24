@@ -25,7 +25,8 @@ namespace Backend.API
             {
                 var uri = new Uri(connectionStrings.Replace("postgres://", "postgresql://"));
                 var userInfo = uri.UserInfo.Split(':');
-                connectionStrings = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.Trim('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+                var port = uri.Port == -1 ? 5432 : uri.Port;
+                connectionStrings = $"Host={uri.Host};Port={port};Database={uri.AbsolutePath.Trim('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
             }
             builder.Services.AddDbContext<AppDbContext>(options =>
            options.UseNpgsql(connectionStrings));
