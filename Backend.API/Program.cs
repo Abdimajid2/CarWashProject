@@ -35,14 +35,17 @@ namespace Backend.API
             var allowedOrigins = (Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")
                       ?? "https://localhost:7027").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
+            var customerUIURL = "https://biltvatteskilstuna.onrender.com";
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("CustomerUI", policy =>
                 {
-                    policy.WithOrigins(allowedOrigins)
+                    var BothOrigins = allowedOrigins.Concat(new[] {customerUIURL}).ToArray();
+                    policy.WithOrigins(BothOrigins)
                           .AllowAnyHeader()
                           .AllowAnyMethod();
-                    // .AllowCredentials();
+                   
                 });
             });
 
