@@ -80,13 +80,20 @@ namespace Backend.API.Controllers
             }
         }
 
-        [HttpPost("test-timeslots")]
-        public async Task<IActionResult> TestTimeSlots()
+
+
+        [HttpGet("gettallbookings")] 
+        public async Task<ActionResult> GetAllBookings()
         {
-            using var scope = _serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var count = await context.TimeSlots.CountAsync();
-            return Ok(new { message = $"Currently have {count} time slots" });
+            try
+            {
+                var allBookings = await _bookingServices.GettAllBookings();
+                return Ok(allBookings);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = $"failed to get all bookings {e.Message}" });
+            }
         }
     }
 }

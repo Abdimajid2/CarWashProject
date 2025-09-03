@@ -53,7 +53,7 @@ namespace Backend.API.Services
 
                 if (!hasSlots)
                 {
-                    // Create 8 hourly slots (9 AM to 5 PM)
+                
                     for (int hour = 9; hour < 17; hour++)
                     {
                         context.TimeSlots.Add(new TimeSlot

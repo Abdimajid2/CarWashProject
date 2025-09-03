@@ -1,6 +1,8 @@
 ﻿using Backend.API.Data;
 using Backend.API.Models;
+using Microsoft.EntityFrameworkCore;
 using Shared.Models.Enum;
+using Shared.Models.ModelDTO;
 using System.Diagnostics;
 
 namespace Backend.API.Services
@@ -64,6 +66,41 @@ namespace Backend.API.Services
                 Debug.WriteLine("error creating booking:" , ex.Message);
                 return null;
             }
+        }
+
+
+        public async Task<List<BookingDTO>> GettAllBookings()
+        {
+             var allabookings = await _context.Bookings
+                .Include(b => b.ServiceType)
+                .Include(b => b.TimeSlot)
+                .OrderByDescending(a => a.CreatedAt)
+                .Select(b => new BookingDTO
+                {
+                    Id = b.Id,
+                    CreatedAt = b.CreatedAt,
+                    Email = b.Email,
+                    LicensePlate = b.LicensePlate.ToUpper(),
+                    Status = b.Status,
+                    ServiceType = new ServiceTypeDTO
+                    {
+                        Id = b.ServiceType.Id,
+                        Name = b.ServiceType.Name,
+                        Description = b.ServiceType.Description,
+                        Price = b.ServiceType.Price
+                    },
+                    TimeSlot = new TimeSlotDTO
+                    {
+                        Id = b.TimeSlot.Id,
+                        AppointmentDate = b.TimeSlot.AppointmentDate,
+                        StartTime = b.TimeSlot.StartTime,
+                        EndTime = b.TimeSlot.EndTime,
+                        IsAvailable = b.TimeSlot.IsAvailable
+                    }
+                })
+                .ToListAsync();
+
+            return allabookings;
         }
     }
 }
