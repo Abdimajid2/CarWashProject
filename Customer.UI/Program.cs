@@ -15,7 +15,7 @@ namespace Customer.UI
                 .AddInteractiveServerComponents();
             builder.Services.AddHttpClient<BookingService>();
             builder.Services.AddScoped<BookingService>();
-            builder.Services.AddMudServices();
+          
             builder.Services.AddHttpClient("Api", (sp, http) =>
             {
                 var cfg = sp.GetRequiredService<IConfiguration>();
