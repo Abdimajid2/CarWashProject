@@ -22,8 +22,6 @@ namespace Backend.API.Controllers
             _services = services;
             _bookingServices = bookingServices;
             _serviceProvider = serviceProvider;
-
-             
         }
 
         [HttpGet("servicetypes")]
