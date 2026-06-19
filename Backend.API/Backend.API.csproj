@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -6,13 +6,19 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>7e0ed875-3c1a-45d7-9e7a-c6389f7089c3</UserSecretsId>
   </PropertyGroup>
+	
+	<ItemGroup>
+    <Content Include="HTMLServices\**\*.html">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+</ItemGroup>
 
   <ItemGroup>
     <None Remove="Backend.API.csproj.user.Backup.tmp" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MailKit" Version="4.14.1" />
+    <PackageReference Include="MailKit" Version="4.17.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
       <PrivateAssets>all</PrivateAssets>

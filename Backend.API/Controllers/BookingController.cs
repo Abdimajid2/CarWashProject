@@ -78,7 +78,7 @@ namespace Backend.API.Controllers
             }
         }
 
-
+        [HttpGet("Confirm")]
 
         [HttpGet("gettallbookings")] 
         public async Task<ActionResult> GetAllBookings()
