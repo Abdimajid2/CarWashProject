@@ -1,0 +1,224 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: carwash
+
+# ---------------------------------------------------------------------
+# DB (postgres:15)
+# Secret = password/user.
+# ---------------------------------------------------------------------
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+  namespace: carwash
+type: Opaque
+stringData:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: password
+  POSTGRES_DB: carwashdb
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-pvc
+  namespace: carwash
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: carwash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: db-secret
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: db-storage
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: db-storage
+          persistentVolumeClaim:
+            claimName: db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db          
+  namespace: carwash
+spec:
+  selector:
+    app: db
+  ports:
+    - port: 5432
+      targetPort: 5432
+
+# BACKEND.API (.NET 8 Web API)
+# Connection string is in secret instead of the YAML file
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-secret
+  namespace: carwash
+type: Opaque
+stringData:
+  ConnectionStrings__PostgreSQLstringDocker: "Host=db;Database=carwashdb;Username=postgres;Password=password"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-api
+  namespace: carwash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-api
+  template:
+    metadata:
+      labels:
+        app: backend-api
+    spec:
+      containers:
+        - name: backend-api
+          image: carwash-backend:local
+          imagePullPolicy: Never     
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:80"
+            - name: DISABLE_HTTPS_REDIRECT
+              value: "true"
+          envFrom:
+            - secretRef:
+                name: backend-secret
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-api 
+  namespace: carwash
+spec:
+  selector:
+    app: backend-api
+  ports:
+    - port: 80
+      targetPort: 80
+
+# ---------------------------------------------------------------------
+# CUSTOMER.UI (Blazor Server)
+# ---------------------------------------------------------------------
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-ui
+  namespace: carwash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: customer-ui
+  template:
+    metadata:
+      labels:
+        app: customer-ui
+    spec:
+      containers:
+        - name: customer-ui
+          image: carwash-customer:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: API_URL
+              value: "http://backend-api:80"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-ui
+  namespace: carwash
+spec:
+  selector:
+    app: customer-ui
+  ports:
+    - port: 8080
+      targetPort: 8080
+
+# ---------------------------------------------------------------------
+# ADMIN.UI
+# ---------------------------------------------------------------------
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-ui
+  namespace: carwash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-ui
+  template:
+    metadata:
+      labels:
+        app: admin-ui
+    spec:
+      containers:
+        - name: admin-ui
+          image: carwash-admin:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: API_URL
+              value: "http://backend-api:80"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-ui
+  namespace: carwash
+spec:
+  selector:
+    app: admin-ui
+  ports:
+    - port: 8080
+      targetPort: 8080
