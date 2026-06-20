@@ -19,7 +19,6 @@ This view is shown only after the visitor has selected both a wash option and an
 
 
 
-
 Confirmation Modal:
 
 When the booking has been saved, the visitor sees the following modal
@@ -31,3 +30,42 @@ When the booking has been saved, the visitor sees the following modal
 - **Backend**: ASP.NET Core Web API (.NET 8)
 - **Frontend**: Blazor server
 - **Database**: PostgreSQL
+
+
+## Running on Kubernetes
+
+You can run this project on a local Kubernetes cluster. The files in `k8s/carwash-k8s.yaml` start four parts in a `carwash` namespace: the **Backend API** (.NET 8), the **Customer UI** and a **PostgreSQL** database.
+
+### What you need
+
+- Docker Desktop with Kubernetes turned on (kubeadm)
+- kubectl
+
+### 1. Build the images
+
+docker build -t carwash-backend:local  -f Backend.API/Dockerfile  .
+docker build -t carwash-customer:local -f Customer.UI/Dockerfile   .
+docker build -t carwash-admin:local    -f Admin.UI/Dockerfile      .
+
+
+### 2. Deploy to the cluster
+
+ kubectl apply -f k8s/carwash-k8s.yaml
+
+- Check that the pods are running:
+  
+kubectl get pods -n carwash
+
+### 3. Open the app
+
+- Forward its port:
+- 
+kubectl port-forward -n carwash service/customer-ui 8080:8080
+
+Now open <http://localhost:8080>.
+
+### How it works
+
+- Each part runs as its own **Deployment**. A **Service** gives it a name, so the UIs can reach the API at `http://backend-api`.
+- The database password and connection string are kept in Kubernetes **Secrets**, not in the YAML files.
+- A **PersistentVolumeClaim** stores the database data, so it stays even if the pod restarts.
