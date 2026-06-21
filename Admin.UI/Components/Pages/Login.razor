@@ -1,0 +1,80 @@
+﻿@page "/login"
+@inject IConfiguration Config
+@inject NavigationManager Nav
+
+<PageTitle>Logga in</PageTitle>
+
+<div class="container" style="max-width: 400px; margin-top: 80px;">
+    <h1 class="mb-4">Admin – Logga in</h1>
+
+    @* EditForm handles the form and automatically adds CSRF (antiforgery)
+       protection.*@
+    <EditForm Model="Input" OnValidSubmit="HandleLogin" FormName="loginForm">
+        <DataAnnotationsValidator />
+
+        <div class="mb-3">
+            <label class="form-label">Användarnamn</label>
+            <InputText @bind-Value="Input.Username" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Lösenord</label>
+            <InputText type="password" @bind-Value="Input.Password" class="form-control" />
+        </div>
+
+        @*Show an error message if login fails*@
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger">@error</div>
+        }
+
+        <button type="submit" class="btn btn-primary w-100">Logga in</button>
+    </EditForm>
+</div>
+
+@code {
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; } = default!;
+
+    // The form values
+    [SupplyParameterFromForm]
+    public LoginModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    private string? error;
+
+    private async Task HandleLogin()
+    {
+        //Read the credentials from configuration
+        var validUser = Config["AdminUser:Username"];
+        var validPass = Config["AdminUser:Password"];
+
+        if (Input.Username == validUser && Input.Password == validPass)
+        {
+           
+            // facts about the user
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.Name, Input.Username!),
+                new(ClaimTypes.Role, "Admin")
+            };
+
+            var identity = new ClaimsIdentity(
+                claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            //authentication cookie in the browser
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            // Send the user onward – back to where they wanted, otherwise the start page.
+            Nav.NavigateTo(string.IsNullOrEmpty(ReturnUrl) ? "/" : ReturnUrl);
+        }
+        else
+        {
+            error = "Fel användarnamn eller lösenord.";
+        }
+    }
+}

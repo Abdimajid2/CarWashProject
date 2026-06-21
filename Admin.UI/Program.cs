@@ -1,4 +1,5 @@
 using Admin.UI.Components;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Admin.UI;
 
@@ -18,6 +19,24 @@ public class Program
             var baseUrl = cfg["ApiBaseUrl"];
             http.BaseAddress = new Uri(baseUrl!);
         });
+
+        builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(
+            options =>
+            {
+                //not logged in user sends to
+                options.LoginPath = "/login";
+
+                //how long until the cookie expires
+                options.ExpireTimeSpan = TimeSpan.FromHours(8);
+                
+                //extend time if user = active
+                options.SlidingExpiration = true;
+            });
+
+        //active authorize attribute on pages
+        builder.Services.AddAuthorization();
+
+        builder.Services.AddCascadingAuthenticationState();
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -31,7 +50,10 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseStaticFiles();
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.UseAntiforgery();
+       
 
         app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode();
